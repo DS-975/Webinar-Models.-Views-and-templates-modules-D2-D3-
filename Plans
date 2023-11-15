@@ -1,0 +1,257 @@
+python -m venv venv
+# Активируем виртуальное окружение
+.\venv\Scripts\activate
+# Устанавливаем библиотеки из requirements.txt (Django)
+pip install -r requirements.txt
+
+django-admin startproject prj
+cd .\prj\
+python manage.py startapp djangopri
+
+
+prj/prj/settings.py → 12 | import os
+                      40 | 'djangopri',
+                      58 | 'DIRS': [os.path.join(BASE_DIR, 'djangopri/templates/djangopri'),],
+
+prj/djangopri → New → File → templates/djangopri/index.html
+
+prj/prj/urls.py → 22 | path('', include('djangopri.urls')),
+
+prj/djangopri → New → Python File → urls.py
+
+prj/djangopri/urls.py → 1 | from django.contrib import admin
+                        2 | from django.urls import path
+                        3 | from djangopri.views import index
+                        4 |
+                        5 | urlpatterns = [
+                        6 |     path('index', )
+                        7 | ]
+
+prj/djangopri/models.py → 1 | from django.db import models
+                          2 |
+                          3 | class Category(models.Model):
+                          4 |    name = models.CharField(max_length=30, unique=True)
+                          5 |    description = models.TextField() # description - описание
+
+prj/djangopri/views.py → 1 | from django.shortcuts import render
+                         2 |
+                         3 |
+                         4 | def index(reduest):
+                         5 |     return render(reduest, 'index.html')
+
+# Проверяем модели на изменение, с помощью - makemigrations
+python manage.py makemigrations
+
+# Вносим изменения, с помощью - migrate
+python manage.py migrate
+
+prj/djangopri/admin.py → 1 | from django.contrib import admin
+                         2 | from djangopri.models import Category
+                         3 |
+                         4 | admin.site.register(Category)
+
+# Проверяем модели на изменение, с помощью - makemigrations
+python manage.py makemigrations
+
+# Вносим изменения, с помощью - migrate
+python manage.py migrate
+
+# Запускаем сервер, с помощью
+python manage.py runserver
+
+# Создадим superuser, admin | admin
+python manage.py createsuperuser
+
+# Запускаем сервер, с помощью
+python manage.py runserver
+
+# Добавляем чистаемость моделей
+prj/djangopri/models.py → 7 |     # Функция "__str__"
+                          8 |     def __str__(self):
+                          9 |         return self.name
+
+# Запускаем сервер, с помощью
+python manage.py runserver
+
+prj/djangopri/models.py → 11 |    # Переписываем Categorys
+                          12 |    class Meta:
+                          13 |        verbose_name = 'Категория'
+                          14 |        verbose_name_plural = 'Категории'
+
+
+prj/djangopri/models.py → 4 |     name = models.CharField(max_length=30, unique=True, verbose_name='Название')
+                          5 |     description = models.TextField(null=True, blank=True, verbose_name='Описание')
+                          6                              # description - описание |
+                          7                              # editable - это возможно изменение в админ панели
+                          8                              # help_text - выводиться в админке текст добавочного описания
+                          9                              # null позволяет сохранить значения нан |
+                          10                              # blank позволяет не заполнять значение |
+                          11                              # verbose_name |
+                          12
+                          13 | # Функция "__str__"
+                          14 |     def __str__(self):
+                          15 |         return self.name
+                          16 |
+                          17 |     # Переписываем Categorys
+                          18 |     class Meta:
+                          19 |         verbose_name = 'Категория'
+                          20 |         verbose_name_plural = 'Категории'
+                          21 |
+                          22 | class Good(models.Model):
+                          23 |     name = models.CharField(max_length=30, verbose_name='Название')
+                          24 |     price = models.PositiveSmallIntegerField(verbose_name='Цена')
+                          25 |     category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL) # Делаем связь (models.ForeignKey),
+                          26 |                                     # обезательное поле - on_delete - что должно происходить в случае удаления
+                          27 |
+                          28 |     # Функция "__str__"
+                          29 |     def __str__(self):
+                          30 |         return self.name
+                          31 |
+                          32 |     # Переписываем Good
+                          33 |     class Meta:
+                          34 |         verbose_name = 'Товар'
+                          35 |         verbose_name_plural = 'Товары'
+# Добавим Category, Good в admin.py
+prj/djangopri/admin.py → 1 | from django.contrib import admin
+                         2 | from djangopri.models import Category, Good # ← Category, Good
+                         3 |
+                         4 | admin.site.register(Category) # ← Category, Good
+                         5 | admin.site.register(Good) # ← Good
+
+prj/djangopri/models.py → 32 |     # Переписываем Good
+                          33 |     class Meta:
+                          34 |         verbose_name = 'Товар'
+                          35 |         verbose_name_plural = 'Товары'
+                          36 |         ordering = ['-price'] # ordering - будет соритровать,
+                          37 |                               # то есть у нас сразу в админке будет сортировать,
+                          38 |                               # -price от меньшему к большему
+                          39 |
+                          40 | class Course(models.Model):
+                          41 |     name = models.CharField(max_length=30)
+                          42 |
+                          43 | class Student(models.Model):
+                          44 |     name = models.CharField(max_length=15)
+                          45 |     course = models.ManyToManyField(Course) # связь - ManyToManyField - c Course
+
+# Добавим Course, Student  в admin.py
+prj/djangopri/admin.py → 1 | from django.contrib import admin
+                         2 | from djangopri.models import Category, Good, Category, Good # ← Course, Student
+                         3 |
+                         4 | admin.site.register(Category)
+                         5 | admin.site.register(Good)
+                         6 | admin.site.register(Course) # ← Course
+                         7 | admin.site.register(Student) # ← Student
+
+# К "Товарам" можнет присоединять множество разных категорий
+
+# Чтоюбы можно было и к "Категориям" присоединять множество разных "Товаров",
+#                   и к "Товарам"  присоединять множество разных "Категорий"
+
+# Проверяем модели на изменение, с помощью - makemigrations
+python manage.py makemigrations
+
+# Вносим изменения, с помощью - migrate
+python manage.py migrate
+
+# Запускаем сервер, с помощью
+python manage.py runserver
+
+prj/djangopri/views.py → 1 | from django.shortcuts import render
+                         2 | from djangopri.models import Good
+                         3 |
+                         4 |
+                         5 | def index(request):
+                         6 |     goods = Good.objects.all()
+                         7 |     return render(request, 'index.html', context={'goods':goods}) # <- 'goods' в index.html
+
+
+# {{ }} - через них мы обращяемся к перерменной
+# {% %} - через них мы обращяемся к циклам, условиям б какие - то блоки
+# Допустим как описывается бло for - <body>{% for x in goods %}</body>  |  goods из prj/djangopri/views.py
+# Мы сейчас пробезимся по тавару goods
+prj/djangopri/templates/djangopri/index.html → 1 | <html>
+                                               2 |
+                                               3 | <head></head>
+                                               4 | <body>{% for x in goods %}
+                                               5 | {{ x }}
+                                               6 | {% endfor %}<!--  Закрываем блок for-->
+                                               7 | </body>
+
+</html>
+
+# Проверяем модели на изменение, с помощью - makemigrations
+python manage.py makemigrations
+
+# Вносим изменения, с помощью - migrate
+python manage.py migrate
+
+# Запускаем сервер, с помощью
+python manage.py runserver
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Пример как работает условие в Django
+# Он пробегаеться по всем элементам goods если у нас этот элемент Kio Rio 3 совпадает с name то он его выводит
+
+prj/djangopri/views.py → 1 | from django.shortcuts import render
+                         2 | from djangopri.models import Good
+                         3 |
+                         4 |
+                         5 | def index(request):
+                         6 |     goods = Good.objects.all()
+                         7 |     return render(request, 'index.html', context={'goods':goods, 'name': 'Kio Rio 3'}) # <- 'name': 'Kio Rio 3'
+
+prj/djangopri/templates/djangopri/index.html → 1 | <html>
+                                               2 |
+                                               3 | <head></head>
+                                               4 | <body>
+                                               5 |     <div>
+                                               6 |         {% for i in goods %}
+                                               7 |         {% if name in i.name %}
+                                               8 |             <h1>{{ name }}</h1>
+                                               9 |         {% endif %}
+                                              10 |         {% endfor %}
+                                              11 |     </div>
+                                              12 | </body>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+# Так же  по мимо условие у нас есть elif
+
+<!-- Допустим мы хотим, чтобы блоко повторялся на других страницах -->
+<!--    <dev>-->
+<!--        {% block name %}-->
+<!--        -->
+<!--        {% endblock name %}-->
+<!--    </dev>-->
+
+<!--    <div>-->
+<!--        {% if name|length > 1 %}-->
+<!--            <h1>{{ name }}</h1>-->
+<!--        -->
+<!--        {% elif %}-->
+<!--        -->
+<!--        {% else %} -->
+<!--        -->
+<!--        {% endif %}-->
+<!--    </div>-->
+
+
+
+
+<!--    <div>-->
+<!--        {% for i in goods %}-->
+<!--        {% if name in i.name %}-->
+<!--            <h1>{{ name }}</h1>-->
+<!--        {% endif %}-->
+<!--        {% endfor %}-->
+<!--    </div>-->
+
+
+
+<!--    <div>{% for x in goods %}-->
+<!--        <h1>{{ x }}</h1><br>-->
+<!--    </div>{% endfor %}-->
+<!--  Закрываем блок for-->
+
+
+# Чтобы добавить новую страничку её нужно создать в HTML (prj/djangopri/templates/djangopri/HTML.html)  и
